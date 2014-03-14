@@ -164,7 +164,7 @@ else:
 
 #calculate deltaF/f
 dff_traces = np.zeros_like(traces)
-for cell in range(1,num_cells):
+for cell in range(num_cells):
     dff_traces[:,cell] = (traces[:,cell]-traces[:30,cell].mean()) / traces[:30,cell].mean()
 
 #plot deltaF/F
@@ -175,17 +175,17 @@ plot(dff_traces);
 savefig(outfile_dir+title+".png")
 
 mean_dff = {}
-for cell in range(1,len(dff_traces)):
+for cell in range(len(dff_traces)):
     mean_dff["Cell #"+str(cell)]= mean(dff_traces[cell, 45:90])
 max_dff = {}
-for cell in range(1,len(dff_traces)):
+for cell in range(len(dff_traces)):
     max_dff["Cell #"+str(cell)]= max(dff_traces[cell, 45:90])
 
 sorted_mean_dff = sorted(mean_dff.items(), key=lambda x:x[1], reverse=True)
-for i in range(1,len(sorted_mean_dff)):
+for i in range(len(sorted_mean_dff)):
     print sorted_mean_dff[i]
 sorted_max_dff = sorted(max_dff.items(), key=lambda x:x[1], reverse=True)
-for i in range(1,len(sorted_max_dff)):
+for i in range(len(sorted_max_dff)):
     print sorted_max_dff[i]
 
 
@@ -245,10 +245,10 @@ f.write("Top 10%% df/f mean of max:" + str(max_10)+ "\n")
 f.write("Top 25%% df/f mean of max:" + str(max_25)+ "\n")
 f.write("Top 100%% df/f mean of max:" + str(max_100)+ "\n"+ "\n")
 f.write("Sorted Mean DeltaF/F per Cell:"+ "\n")
-for i in range(1,len(sorted_mean_dff)):
+for i in range(len(sorted_mean_dff)):
     f.write(str(sorted_mean_dff[i])+ "\n")
 f.write("Sorted Max DeltaF/F per Cell:"+ "\n")
-for i in range(1,len(sorted_max_dff)):
+for i in range(len(sorted_max_dff)):
     f.write(str(sorted_max_dff[i])+ "\n")
 f.close()
 
