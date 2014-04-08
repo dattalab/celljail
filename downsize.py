@@ -18,12 +18,16 @@ files = [file for file in files if 'LOG' not in file]
 files = [file for file in files if 'TXT' not in file]
 files = [file for file in files if 'INF' not in file]
 files = [file for file in files if 'small' not in file]
+files = [file for file in files if '.npz' not in file]
 
 for file in files:
 	print file
-	temp = tiffile.imread(file)
-	temp = io.downsample2d(temp, 3).astype('int16')
-	outfile = file + '_small_x3'
-	tiffile.imsave(outfile, temp)
+	try:
+		temp = tiffile.imread(file)
+		temp = io.downsample2d(temp, 3).astype('int16')
+		outfile = file + '_small_x3'
+		tiffile.imsave(outfile, temp)
+	except:
+		print "Downsample Failed:" + file
 	print "done with: " + outfile
 
