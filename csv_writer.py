@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# <nbformat>3.0</nbformat>
+
+# <codecell>
+
 import csv, re, cStringIO, codecs, string
 import sys, time, os
 import re
@@ -62,6 +67,8 @@ for folder in os.listdir(directory):
                 #parse out screendayN, ms4, odor mix
                 temp_dict['filename'] = filename[:-4]
                 splitName = filename[:-5].split("_")
+                #strange mix names
+                strangeMixNames = ['guan','co2','cs2','uroguan']
                 for name in splitName:
                     if 'screenN' in name:
                         temp_dict['screenN'] = name
@@ -69,6 +76,16 @@ for folder in os.listdir(directory):
                         temp_dict['screenday'] = name
                     elif 'mix' in name:
                         temp_dict['mix'] = name
+                    elif 'guan' in name:
+                        temp_dict['mix'] = name
+                    elif 'co2' in name:
+                        temp_dict['mix'] = name
+                    elif 'cs2' in name:
+                        temp_dict['mix'] = name
+                    elif 'uroguan' in name:
+                        temp_dict['mix'] = name
+                    elif 'uan' in name:
+                        temp_dict['mix'] = 'guan'
                     else:
                         temp_dict['ms4'] = name
 
@@ -97,207 +114,121 @@ for folder in os.listdir(directory):
                 text_file.close()
 
 pp = pprint.PrettyPrinter(indent=4)
-# pp.pprint(data)
+pp.pprint(data)
 
-def sub_dict(somedict, somekeys, default=None):
-    return dict([ (k, somedict.get(k, default)) for k in somekeys ])
 
-def copyf(dictlist, key, valuelist):
-    return [dictio for dictio in dictlist if dictio[key] in valuelist]
+# <codecell>
 
 #open csv file in new directory
 outfile = directory + "/" + "csvOutputs"
 if not os.path.exists(outfile):
     os.makedirs(outfile)
 
-NofScreen = ["screenNof1","dataforscreenNof2"]
-categories = ['totalCells', 'Num_5std', 'Num_20std', 'Num_50std', 'MeanMax5std','MeanMax20std','MeanMax50std', 'top10dff_Mean','top25dff_Mean', 'top10dff_MeanMax', 'top25dff_MeanMax','top100dff_MeanMax'] 
-for screenN in NofScreen:
+# <codecell>
 
-    screenNList = [screenN]
-    print [screenNList]
+screenNList = []
+for dictionary in data:
+    for key, value in dictionary.iteritems():
+        if key is "screenN" and value not in screenNList:
+            screenNList.append(value)
+print screenNList
+
+categories = []
+for dictionary in data:
+    keys = dictionary.keys()
+    categories= list(set(categories) | set(keys))
+print categories
+
+# <codecell>
+
+# data_categories = ['totalCells', 'Num_5std', 'Num_20std', 'Num_50std', 'MeanMax5std','MeanMax20std','MeanMax50std', 'top10dff_Mean','top25dff_Mean', 'top10dff_MeanMax', 'top25dff_MeanMax','top100dff_MeanMax'] 
+
+# <codecell>
+
+def dataHunter(data, screenN, category, mix, ms4):
+    datum = ''
+    for slide in data:
+        if 'screenN' in slide:
+            if slide['screenN'] == screenN:
+                if 'mix' in slide:
+                    if slide['mix'] == mix:
+                        if 'ms4' in slide:
+                            if slide['ms4'] == ms4:
+                                if category in slide:
+                                    datum = slide[category]
+                                    break
+    return datum
+
+# <codecell>
+
+# def dataHunter(data, screenN, category, mix, ms4):
+#     datum = ''
+#     for slide in data:
+#         if slide['screenN'].lower() == screenN.lower():
+#             if slide['mix'].lower() == mix.lower():
+#                 if slide['ms4'].lower() == ms4.lower():
+#                     if category.lower() in slide.lower():
+#                         datum = slide[category]
+#                         break
+#     return datum
+
+# <codecell>
+
+for screenN in screenNList:
+    print "+++++++++++" + screenN + "++++++++++++++++++++++"
     NofScreenData = [dictio for dictio in data if dictio.has_key('screenN') is True]
-    # pp.pprint(NofScreenData)
-    NofScreenData = [dictio for dictio in NofScreenData if dictio['screenN'] in screenNList]
+    filteredNofScreenData = []
+    for dictio in NofScreenData:
+        if dictio['screenN'] == screenN:
+            filteredNofScreenData.append(dictio)
     for category in categories:
         print "==========" + category + "==========="
         output = open(outfile+"/"+screenN+"_"+category+".csv", "wb")
         print output
         writer = UnicodeWriter(output)
-
+        
         # add header row
         headerRow = []
         for slide in data:
             if 'screenN' in slide:
                 if slide['screenN'] == screenN:
                     if 'ms4' in slide:
-                        if slide['ms4'] not in (s.lower() for s in headerRow):
-                        # if slide['ms4'] not in headerRow:
-                            headerRow.append(slide['ms4'])
+                        if slide['ms4'].lower() not in headerRow:
+                            headerRow.append(slide['ms4'].lower())
         # headerRow = sorted(headerRow)
         headerRow_withTitle = []
         headerRow_withTitle = headerRow[:]
         headerRow_withTitle[:0] = ["Mix Names"]
         print headerRow_withTitle
-        # writer.writerow(headerRow_withTitle)
-
+        writer.writerow(headerRow_withTitle)
+        
         #find mix names
         mixNames = []
         for slide in data:
             if 'screenN' in slide:
                 if slide['screenN'] == screenN:
                     if 'mix' in slide:
-                        if slide['mix'] not in mixNames:
-                            mixNames.append(slide['mix'])
-        # print mixNames
+                        if slide['mix'].lower() not in mixNames:
+                            mixNames.append(slide['mix'].lower())
+        print mixNames
         # mixNames = sorted(mixNames)
-
-
+    
         #add data
         #for each headerRow category
-
+        
         for mix in mixNames:
             tempRow = []
             tempRow.append(mix)
             for ms4 in headerRow:
-                datum = None
-
-                for slide in NofScreenData:
-                    # if 'screenN' in slide:
-                        if 'mix'in slide:
-                            if 'ms4' in slide:
-                                if (slide['screenN'] == screenN and slide['mix'] == mix and slide['ms4'] == ms4):
-                                    datum = slide[category]
-                # for slide in data:
-                #     if 'screenN' in slide:
-                #         if slide['screenN'] == screenN:
-                #             if 'mix' in slide:
-                #                 if slide['mix'] == mix:
-                #                     if 'ms4' in slide:
-                #                         if slide['ms4'] == ms4:
-                #                             tempRow.append(slide[category])
-                #                         else:
-                #                             tempRow.append("---")
-
-                if datum is not None:
-                    tempRow.append(datum)
-                else:
-                    tempRow.append('')
-            # print tempRow
-            # writer.writerow(tempRow)
-
+                tempRow.append(dataHunter(data, screenN, category, mix, ms4))
+            writer.writerow(tempRow)
         output.close()
 
+# <codecell>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        # categoryData = [dictio for dictio in NofScreenData if dictio.has_key(category) is True]
-        # categoryList = [category]
-        # for slide in categoryData:
-        #     if slide = categoryData
-        #     pp.pprint(slide)
-
-
-        # categoryData = [dictio for dictio in categoryData if dictio[str(category)] in categoryList]
-        # pp.pprint(categoryData)
-        # pp.pprint(categoryData2)
-        # if category is 'totalCells':
-        #     print "totalCells"
-
-        # toCSV = []
-        # keylist = ['mix','ms4',category]
-        # categoryData = [dictio for dictio in NofScreenData if dictio.has_key(category) is True]
-        # for dictio in categoryData:
-        #     for k in dictio.keys(): 
-        #         if k not in keylist: 
-        #             del dictio[k]
-        # toCSV.append(dictio)
-        # pp.pprint(toCSV)
-            
-        
-
-        # output = open(outfile+"/"+screenN+"_"+category+".csv", "wb")
-        # print output
-        # dict_writer = csv.DictWriter(output, headerRow_withTitle)
-        # dict_writer.writer.writerow(headerRow_withTitle)
-        # dict_writer.writerows(toCSV)
-        # output.close()
-
-#==========================================
-# NofScreen = ["screenNof1","dataforscreenNof2"]
-# categories = ['totalCells', 'Num_5std', 'Num_20std', 'Num_50std', 'MeanMax5std','MeanMax20std','MeanMax50std', 'top10dff_Mean','top25dff_Mean', 'top10dff_MeanMax', 'top25dff_MeanMax','top100dff_MeanMax'] 
-# for screenN in NofScreen:
-#     for category in categories:
-#         output = open(outfile+"/"+screenN+"_"+category+".csv", "wb")
-#         print output
-#         writer = UnicodeWriter(output)
-
-#         # add header row
-#         headerRow = []
-#         for slide in data:
-#             if 'screenN' in slide:
-#                 if slide['screenN'] == screenN:
-#                     if 'ms4' in slide:
-#                         if slide['ms4'] not in headerRow:
-#                             headerRow.append(slide['ms4'])
-#         headerRow = sorted(headerRow)
-#         headerRow_withTitle = []
-#         headerRow_withTitle = headerRow[:]
-#         headerRow_withTitle[:0] = ["Mix Names"]
-#         writer.writerow(headerRow_withTitle)
-
-#         #find mix names
-#         mixNames = []
-#         for slide in data:
-#             if 'screenN' in slide:
-#                 if slide['screenN'] == screenN:
-#                     if 'mix' in slide:
-#                         if slide['mix'] not in mixNames:
-#                             mixNames.append(slide['mix'])
-#         mixNames = sorted(mixNames)
-
-#         #add data
-#         #for each headerRow category
-
-#         for mix in mixNames:
-#             tempRow = []
-#             tempRow.append(mix)
-#             for ms4 in headerRow:
-#                 datum = None
-
-#                 for slide in data:
-#                     if 'screenN' in slide:
-#                         if 'mix'in slide:
-#                             if 'ms4' in slide:
-#                                 if (slide['screenN'] == screenN and slide['mix'] == mix and slide['ms4'] == ms4):
-#                                     datum = slide[category]
-#                 # for slide in data:
-#                 #     if 'screenN' in slide:
-#                 #         if slide['screenN'] == screenN:
-#                 #             if 'mix' in slide:
-#                 #                 if slide['mix'] == mix:
-#                 #                     if 'ms4' in slide:
-#                 #                         if slide['ms4'] == ms4:
-#                 #                             tempRow.append(slide[category])
-#                 #                         else:
-#                 #                             tempRow.append("---")
-
-#                 if datum is not None:
-#                     tempRow.append(datum)
-#                 else:
-#                     tempRow.append('-')
-#             writer.writerow(tempRow)
-
-#         output.close()
 print "Done with CSV Writer."
+
+# <codecell>
+
+ 
+
