@@ -9,7 +9,7 @@ try:
     print datadir
 except:
     print "Missing arguments"
-    datadir = "/files/Neurobio/DattaLab/Paul/screendataforkei/dataforscreenNof2/screenday7/4D/mix4c/"
+    datadir = "/Users/KeiMasuda/Desktop/internalCalciumMutagenesis/internalcalcium071114"
 
 img_dir = os.path.join(datadir, '*')
 print img_dir

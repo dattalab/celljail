@@ -39,13 +39,21 @@ outfile_dir = outfile_dir_parent + filename+ "/"
 figure(figsize=(15,3))
 title = filename[:-5] + "_Raw Data"
 suptitle(title)
-plot(traces[:-10,:]);
+frame = 1.0/250.0
+axhspan(traces.min(), traces.max(),frame*30, frame*50, alpha=0.25)
+axhspan(traces.min(), traces.max(),frame*80, frame*100, alpha=0.25)
+# plot(traces[:-5,:]);
+plot(traces[0:-220,:]);
 savefig(outfile_dir+title+".png")
 
 figure(figsize=(15,3))
 title = filename[:-5]+"_Normalized(divided by baseline)"
 suptitle(title)
-plot(normed_traces[:-10,:]);
+frame = 1.0/250.0
+axhspan(normed_traces.min(), normed_traces.max(),frame*30, frame*50, alpha=0.25)
+axhspan(normed_traces.min(), normed_traces.max(),frame*140, frame*160, alpha=0.25)
+plot(normed_traces[:-220,:]);
+# plot(normed_traces[:-5,:]);
 savefig(outfile_dir+title+".png")
 
 figure(figsize=(20,20))
@@ -116,47 +124,45 @@ suptitle(title)
 savefig(outfile_dir+title+".png")
 
 
-if len(responders_5) > 0:
+if not np.array(responders_5).any():
+    max_traces_5 = []
+    print max_traces_5
+    print max_traces_5
+else:
     response_traces_5 = traces[30:90,np.array(responders_5)]/means[np.array(responders_5)]
     num_traces_5 = response_traces_5.shape[1]
     max_traces_5 = []
     for i in range(num_traces_5):
         max_traces_5.append(max(trace[i] for trace in response_traces_5))
-    mean_max_traces_5 = mean(max_traces_5)
     print max_traces_5
-    print mean_max_traces_5
-else: 
-    max_traces_5 = "n/a (no cells)"
-    mean_max_traces_5 = "n/a (no cells)"
+    print mean(max_traces_5)
 
 
-
-
-if len(responders_20) > 0:
+if not np.array(responders_20).any():
+    max_traces_20 = []
+    print max_traces_20
+    print max_traces_20
+else:
     response_traces_20 = traces[30:90,np.array(responders_20)]/means[np.array(responders_20)]
     num_traces_20 = response_traces_20.shape[1]
     max_traces_20 = []
     for i in range(num_traces_20):
         max_traces_20.append(max(trace[i] for trace in response_traces_20))
-    mean_max_traces_20 = mean(max_traces_20)
     print max_traces_20
-    print mean_max_traces_20
-else: 
-    max_traces_20 = "n/a (no cells)"
-    mean_max_traces_20 = "n/a (no cells)"
+    print mean(max_traces_20)
 
-if len(responders_50) > 0:
+if not np.array(responders_50).any():
+    max_traces_50 = []
+    print max_traces_50
+    print max_traces_50
+else:
     response_traces_50 = traces[30:90,np.array(responders_50)]/means[np.array(responders_50)]
     num_traces_50 = response_traces_50.shape[1]
     max_traces_50 = []
     for i in range(num_traces_50):
         max_traces_50.append(max(trace[i] for trace in response_traces_50))
-    mean_max_traces_50 = mean(max_traces_50)
     print max_traces_50
     print mean(max_traces_50)
-else: 
-    max_traces_50 = "n/a (no cells)"
-    mean_max_traces_50 = "n/a (no cells)"
 
 
 #====================OUTFILE==================
@@ -176,10 +182,17 @@ savefig(outfile_dir+title+".png")
 
 mean_dff = {}
 for cell in range(len(dff_traces)):
-    mean_dff["Cell #"+str(cell)]= mean(dff_traces[cell, 45:90])
+    if not np.array(dff_traces[cell, 45:90]).any():
+        mean_dff = {}
+    else:
+        mean_dff["Cell #"+str(cell)]= mean(dff_traces[cell, 45:90])
 max_dff = {}
 for cell in range(len(dff_traces)):
-    max_dff["Cell #"+str(cell)]= max(dff_traces[cell, 45:90])
+    if not np.array(dff_traces[cell, 45:90]).any():
+        max_dff = {}
+    else:
+        max_dff["Cell #"+str(cell)]= max(dff_traces[cell, 45:90])
+
 
 sorted_mean_dff = sorted(mean_dff.items(), key=lambda x:x[1], reverse=True)
 for i in range(len(sorted_mean_dff)):
@@ -233,12 +246,12 @@ f.write("Number of 20 std: " + str(len(responders_20))+ "\n")
 f.write("20 std cells: " + str(responders_20)+ "\n"+ "\n")
 f.write("Number of 50 std: " + str(len(responders_50))+ "\n")
 f.write("50 std cells: " + str(responders_50)+ "\n"+ "\n")
-f.write("Max Normalized response values for 5 std: " + str(max_traces_5)+ "\n")
-f.write("Average Normalized Max Response for 5 std: " + str(mean_max_traces_5)+ "\n"+ "\n")
-f.write("Max Normalized response values for 20 std: " + str(max_traces_20)+ "\n")
-f.write("Average Normalized Max Response for 20 std: " + str(mean_max_traces_20)+ "\n"+ "\n")
-f.write("Max Normalized response values for 50 std: " + str(max_traces_50)+ "\n")
-f.write("Average Normalized Max Response for 50 std: " + str(mean_max_traces_50)+ "\n"+ "\n")
+# f.write("Max Normalized response values for 5 std: " + str((max_traces_5)+ "\n")
+# f.write("Average Normalized Max Response for 5 std: " + str(mean(max_traces_5)+ "\n"+ "\n")
+# f.write("Max Normalized response values for 20 std: " + str((max_traces_20)+ "\n")
+# f.write("Average Normalized Max Response for 20 std: " + str(mean(max_traces_20))+ "\n"+ "\n")
+# f.write("Max Normalized response values for 50 std: " + str((max_traces_50)+ "\n")
+# f.write("Average Normalized Max Response for 50 std: " + str((mean(max_traces_50)+ "\n"+ "\n")
 f.write("Top 10%% df/f mean:" + str(mean_10)+ "\n")
 f.write("Top 25%% df/f mean:" + str(mean_25)+ "\n"+ "\n")
 f.write("Top 10%% df/f mean of max:" + str(max_10)+ "\n")
