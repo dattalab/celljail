@@ -19,6 +19,14 @@ from skimage.filter import rank
 from skimage.util import img_as_ubyte
 from skimage import filter
 
+FRAMES = 120
+GRAPHSIZE = 120
+FRAMEDELAY = 0
+STIM_1_START = 30+FRAMEDELAY
+STIM_1_END = 60+FRAMEDELAY
+STIM_2_START = 0+FRAMEDELAY
+STIM_2_END = 0+FRAMEDELAY
+
 
 print "=========START CODE=========="
 
@@ -35,7 +43,7 @@ except:
 
 img_dir = os.path.join(datadir, '*small*')
 img_files = glob(img_dir)
-img_files = sorted(img_files)
+img_files = sorted(img_files)[:FRAMES]
 for i in img_files:
     print i.split("/")
 

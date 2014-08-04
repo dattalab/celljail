@@ -24,19 +24,18 @@ from skimage.util import img_as_ubyte
 from skimage import filter
 
 
-FRAMES = 220
-GRAPHSIZE = 250
-FRAMEDELAY = 8
+FRAMES = 120
+GRAPHSIZE = 120
+FRAMEDELAY = 0
 STIM_1_START = 30+FRAMEDELAY
-STIM_1_END = 50+FRAMEDELAY
-STIM_2_START = 140+FRAMEDELAY
-STIM_2_END = 160+FRAMEDELAY
+STIM_1_END = 60+FRAMEDELAY
+STIM_2_START = 0+FRAMEDELAY
+STIM_2_END = 0+FRAMEDELAY
 
 
 filename = sys.argv[1]
 # data = np.load("/Users/KeiMasuda/Desktop/2013DattaLab/Datta_Python/Results/"+filename)
 data = np.load("/home/fkm4/results/"+filename)
-
 
 for key, value in data.iteritems():
     print key
@@ -44,6 +43,7 @@ for key, value in data.iteritems():
 traces = data["traces"]
 label_mask = data["label_mask"]
 
+num_cells = traces.shape[1]
 
 # print traces
 print "Found %d unique cells" % traces.shape[1]
@@ -83,7 +83,17 @@ title = filename[:-5]+"_Normalized"
 suptitle(title)
 axhspan(normed_traces.min(), normed_traces.max(),frame*STIM_1_START, frame*STIM_1_END, alpha=0.25);
 axhspan(normed_traces.min(), normed_traces.max(),frame*STIM_2_START, frame*STIM_2_END, alpha=0.25);
-plot(normed_trace);
+plot(normed_traces);
+savefig(outfile_dir+title+".png")
+
+#smoothed normed traces
+figure(figsize=(15,3))
+title = filename[:-5]+"_Smoothed"
+suptitle(title)
+axhspan(normed_traces.min(), normed_traces.max(),frame*STIM_1_START, frame*STIM_1_END, alpha=0.25);
+axhspan(normed_traces.min(), normed_traces.max(),frame*STIM_2_START, frame*STIM_2_END, alpha=0.25);
+for cell in range(1,num_cells):
+    _ = plot(tm.smooth(normed_traces[:,cell], window_len=11, window='flat'))
 savefig(outfile_dir+title+".png")
 
 figure(figsize=(20,20))
