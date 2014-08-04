@@ -9,6 +9,25 @@ from glob import glob
 from joblib import Parallel, delayed
 from itertools import product
 from pylab import *
+import sys
+sys.path.append('/home/fkm4/dattacode/')
+import traces as tm
+import imaging.segmentation as seg
+from skimage.morphology import watershed, disk
+from skimage import data
+from skimage.filter import rank
+from skimage.util import img_as_ubyte
+from skimage import filter
+
+
+FRAMES = 220
+GRAPHSIZE = 250
+FRAMEDELAY = 8
+STIM_1_START = 30+FRAMEDELAY
+STIM_1_END = 50+FRAMEDELAY
+STIM_2_START = 140+FRAMEDELAY
+STIM_2_END = 160+FRAMEDELAY
+
 print "=========START CODE=========="
 
 try:
@@ -40,15 +59,26 @@ Is = Is[:,::2,::2].astype('float64')
 accum = np.log(Is.max(axis=0))
 
 import skimage.segmentation, skimage.feature, skimage.morphology.watershed
-I = accum.copy()
-# I = ndimage.grey_opening(I,(3,3))
-maxes = skimage.feature.peak_local_max(I, min_distance=1, threshold_abs=5.2, indices=False)
-
+import mahotas, pymorph
 I_show = accum.copy()
+#increase contrast
+import ImageEnhance
+I_contrast = pow(I_show.astype("uint16"), 3)
+#find regional maxima
+regionalMax = pymorph.regmax((I_contrast).astype("uint16"))
+#find seeds and cell number
+seeds,numCells = ndimage.label(regionalMax)
+print numCells
+#edge detection
+T = mahotas.thresholding.otsu(I_contrast.astype("uint16"))
+dist = ndimage.distance_transform_edt(I_contrast.astype("uint16") > T)
+dist = dist.max() - dist
+dist -= dist.min()
+dist = dist/float(dist.ptp()) * 255
+dist = dist.astype(np.uint8)
+#watershed
+I_mask = pymorph.cwatershed(dist, seeds)
 
-I_mask = ndimage.grey_dilation(maxes,(1,2)).astype('float32')
-I_mask[I_mask == True] = I_show.max()*1.01
-# imshow(I_show+I_mask, cmap='jet'); colorbar()
 
 frames, x, y = Is.shape
 label_mask, num_cells = ndimage.label(I_mask.astype(bool))
@@ -56,19 +86,13 @@ print frames
 print num_cells
 
 traces = np.zeros((frames, num_cells))
-
-print traces.dtype
-print Is.dtype
-
 baselined_traces = np.zeros_like(traces)
 normed_traces = np.zeros_like(traces)
 for cell in range(1,num_cells):
     traces[:,cell] = Is[:,label_mask==cell].mean(axis=1)
-    baselined_traces[:,cell] = traces[:,cell] - traces[:30,cell].mean()
-    normed_traces[:,cell] = traces[:,cell] / traces[:30,cell].mean()
 print "Found %d unique cells" % traces.shape[1]
 
-print normed_traces
+print traces
 
 # pdb.set_trace()
 mixName = datadir.split('/')
