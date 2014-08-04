@@ -20,14 +20,6 @@ from skimage.util import img_as_ubyte
 from skimage import filter
 
 
-FRAMES = 220
-GRAPHSIZE = 250
-FRAMEDELAY = 8
-STIM_1_START = 30+FRAMEDELAY
-STIM_1_END = 50+FRAMEDELAY
-STIM_2_START = 140+FRAMEDELAY
-STIM_2_END = 160+FRAMEDELAY
-
 print "=========START CODE=========="
 
 try:
