@@ -8,6 +8,7 @@ def listdir_nohidden(searchList):
 
 pythonScript = "bsub -q short -W 60 -R 'rusage[mem=10000]' -R 'select[transfer]' python downsize.py"
 directory = "/files/Neurobio/DattaLab/Paul/screendataforkei"
+# directory = "/Volumes/Neurobio/DattaLab/Paul/screendataforkei"
 orchestraDirectory = "/files/Neurobio/DattaLab/Paul/screendataforkei"
 for bigDirectory in os.listdir(directory):
 	if not bigDirectory.startswith('.'):

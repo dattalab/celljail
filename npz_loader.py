@@ -24,13 +24,13 @@ from skimage.util import img_as_ubyte
 from skimage import filter
 
 
-FRAMES = 120
-GRAPHSIZE = 120
+FRAMES = 310
+GRAPHSIZE = 350
 FRAMEDELAY = 0
 STIM_1_START = 30+FRAMEDELAY
-STIM_1_END = 60+FRAMEDELAY
-STIM_2_START = 0+FRAMEDELAY
-STIM_2_END = 0+FRAMEDELAY
+STIM_1_END = 50+FRAMEDELAY
+STIM_2_START = 140+FRAMEDELAY
+STIM_2_END = 160+FRAMEDELAY
 
 
 filename = sys.argv[1]
@@ -58,6 +58,7 @@ m = tm.mask_deviations(traces, 2.25)
 bs = tm.baseline_splines(m, 5)
 frame = 1.0/GRAPHSIZE;
 normed_traces = (traces-bs)/bs
+first30Normalized_traces = (traces-traces[0:30].mean())/traces[0:30].mean()
 
 #================================
 #save out images
@@ -79,7 +80,7 @@ savefig(outfile_dir+title+".png")
 
 
 figure(figsize=(15,3))
-title = filename[:-5]+"_Normalized"
+title = filename[:-5]+"_SplineNormalized"
 suptitle(title)
 axhspan(normed_traces.min(), normed_traces.max(),frame*STIM_1_START, frame*STIM_1_END, alpha=0.25);
 axhspan(normed_traces.min(), normed_traces.max(),frame*STIM_2_START, frame*STIM_2_END, alpha=0.25);
@@ -95,6 +96,17 @@ axhspan(normed_traces.min(), normed_traces.max(),frame*STIM_2_START, frame*STIM_
 for cell in range(1,num_cells):
     _ = plot(tm.smooth(normed_traces[:,cell], window_len=11, window='flat'))
 savefig(outfile_dir+title+".png")
+
+#smoothed normed traces
+figure(figsize=(15,3))
+title = filename[:-5]+"_First30Normalized"
+suptitle(title)
+axhspan(normed_traces.min(), normed_traces.max(),frame*STIM_1_START, frame*STIM_1_END, alpha=0.25);
+axhspan(normed_traces.min(), normed_traces.max(),frame*STIM_2_START, frame*STIM_2_END, alpha=0.25);
+for cell in range(1,num_cells):
+    _ = plot(first30Normalized_traces)
+savefig(outfile_dir+title+".png")
+
 
 figure(figsize=(20,20))
 title = filename[:-5]+"_Image Mask"

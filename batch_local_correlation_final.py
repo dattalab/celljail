@@ -19,13 +19,13 @@ from skimage.filter import rank
 from skimage.util import img_as_ubyte
 from skimage import filter
 
-FRAMES = 120
-GRAPHSIZE = 120
+FRAMES = 310
+GRAPHSIZE = 350
 FRAMEDELAY = 0
 STIM_1_START = 30+FRAMEDELAY
-STIM_1_END = 60+FRAMEDELAY
-STIM_2_START = 0+FRAMEDELAY
-STIM_2_END = 0+FRAMEDELAY
+STIM_1_END = 50+FRAMEDELAY
+STIM_2_START = 140+FRAMEDELAY
+STIM_2_END = 160+FRAMEDELAY
 
 
 print "=========START CODE=========="
@@ -100,7 +100,7 @@ saveMixName = '_'.join(mixName[-5:])
 # saveFileName = os.path.join(datadir, saveMixName)
 saveFileName = os.path.join("/home/fkm4/results/", saveMixName)
 np.savez(saveFileName, traces=traces, baselined_traces=baselined_traces, normed_traces=normed_traces, label_mask=label_mask)
-tiffile.imsave(saveFileName+'.tif', movie, compress=0)
+# tiffile.imsave(saveFileName+'.tif', movie, compress=0)
 print "saved " + saveFileName
 
 # Use np.savez to save `traces` and `label_mask` and the mask out. 
